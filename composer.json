@@ -1,0 +1,13 @@
+{
+    "name": "ljohanet/oidc",
+    "description": "phpBB OpenID Connect plugin",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Louis JOHANET",
+            "email": "louis@johanet.fr"
+        }
+    ],
+    "require": {}
+}
