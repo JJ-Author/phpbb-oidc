@@ -4,6 +4,8 @@ namespace ojathelonius\oidc\auth\provider;
 
 use Jumbojett\OpenIDConnectClient;
 use Symfony\Component\Yaml\Yaml;
+use ojathelonius\oidc\model\OIDCUser;
+use ojathelonius\oidc\service\UserService;
 
 if (!defined('IN_PHPBB')) {
     exit;
@@ -14,6 +16,9 @@ class auth_oidc extends \phpbb\auth\provider\base
     /** @var \phpbb\db\driver\driver_interface $db */
     protected $db;
 
+    /* Configuration */
+    private $config;
+
     /**
      * Database Authentication Constructor
      *
@@ -22,6 +27,8 @@ class auth_oidc extends \phpbb\auth\provider\base
     public function __construct(\phpbb\db\driver\driver_interface $db)
     {
         $this->db = $db;
+
+        $this->config = $this->getOIDCConfig();
     }
 
     /**
@@ -29,7 +36,7 @@ class auth_oidc extends \phpbb\auth\provider\base
      */
     public function login($username, $password)
     {
-        $this->oidcLogin();
+        return $this->oidcLogin();
     }
 
     /**
@@ -37,7 +44,7 @@ class auth_oidc extends \phpbb\auth\provider\base
      */
     public function autologin()
     {
-        $this->oidcLogin();
+        return $this->oidcLogin();
     }
 
     /**
@@ -45,18 +52,25 @@ class auth_oidc extends \phpbb\auth\provider\base
      */
     public function oidcLogin()
     {
-        $config = $this->getOIDCConfig();
-        $oidc = new OpenIDConnectClient(
-            $config['url'],
-            $config['clientId'],
-            $config['secret']);
 
-        $oidc->setVerifyPeer($config['ssl']);
-        $oidc->setVerifyHost($config['ssl']);
+        $oidc = new OpenIDConnectClient(
+            $this->config['url'],
+            $this->config['clientId'],
+            $this->config['secret']);
+
+        $oidc->setVerifyPeer($this->config['ssl']);
+        $oidc->setVerifyHost($this->config['ssl']);
 
         $oidc->setRedirectURL(generate_board_url() . '/');
         $oidc->authenticate();
+        
+        /* Create OIDCUser */
+        $oidcUser = new OIDCUser($oidc->requestUserInfo());
 
+        /* If user does not exist, and config disallow creating new users */
+        if (!UserService::userExists($oidcUser->getSub()) && !$this->config['createIfMissing']) {
+            /* TODO : handle exceptions */
+        }
     }
 
     /**

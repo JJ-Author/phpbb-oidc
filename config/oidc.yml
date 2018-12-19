@@ -2,4 +2,5 @@ url: 'http://idp/'
 clientId: 'clientId'
 secret: 'secret'
 ssl: false
+createIfMissing: true
 
