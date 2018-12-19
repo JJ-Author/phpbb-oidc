@@ -67,7 +67,7 @@ class auth_oidc extends \phpbb\auth\provider\base
         /* Create OIDCUser */
         $oidcUser = new OIDCUser($oidc->requestUserInfo());
 
-        /* If user does not already exist*/
+        /* If user does not already exist */
         if (!UserService::userExists($oidcUser->getPreferredUsername())) {
 
             /* If configuration allows, create new user */
@@ -78,7 +78,9 @@ class auth_oidc extends \phpbb\auth\provider\base
             }
 
         } else {
-            /* Register user */
+            $userRow = UserService::getUserRow($oidcUser->getPreferredUsername());
+
+            return $this->buildReturn($userRow);
         }
     }
 
@@ -88,5 +90,14 @@ class auth_oidc extends \phpbb\auth\provider\base
     public function getOIDCConfig()
     {
         return Yaml::parse(file_get_contents(__DIR__ . '/../../config/oidc.yml'));
+    }
+
+    public function buildReturn($row)
+    {
+        return [
+            'status' => LOGIN_SUCCESS,
+            'error_msg' => false,
+            'user_row' => $row,
+        ];
     }
 }
