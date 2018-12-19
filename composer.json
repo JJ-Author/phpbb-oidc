@@ -1,13 +1,28 @@
 {
-    "name": "ljohanet/oidc",
+    "name": "ojathelonius/oidc",
+    "type": "phpbb-extension",
     "description": "phpBB OpenID Connect plugin",
-    "type": "library",
-    "license": "MIT",
+    "version": "0.1.0",
+    "homepage": "https://github.com/ojathelonius/phpbb-oidc",
+    "license": "GPL-2.0",
+    "keywords": ["phpbb", "extension", "openid", "oidc", "sso"],
     "authors": [
         {
             "name": "Louis JOHANET",
-            "email": "louis@johanet.fr"
+            "email": "louis@johanet.fr",
+            "homepage": "https://github.com/ojathelonius/",
+            "role": "Developer"
         }
     ],
-    "require": {}
+    "require": {
+        "jumbojett/openid-connect-php": "^0.7.0",
+        "php": ">=5.4.0",
+        "composer/installers": "~1.0"
+    },
+    "extra": {
+        "display-name": "phpBB OIDC auth",
+        "soft-require": {
+            "phpbb/phpbb": "~3.2"
+        }
+    }
 }
