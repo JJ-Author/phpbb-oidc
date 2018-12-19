@@ -66,27 +66,27 @@ class OIDCUser
 		$this->name = $name;
 	}
 
-	public function getGiven_name(){
+	public function getGivenName(){
 		return $this->given_name;
 	}
 
-	public function setGiven_name($given_name){
+	public function setGivenName($given_name){
 		$this->given_name = $given_name;
 	}
 
-	public function getFamily_name(){
+	public function getFamilyName(){
 		return $this->family_name;
 	}
 
-	public function setFamily_name($family_name){
+	public function setFamilyName($family_name){
 		$this->family_name = $family_name;
 	}
 
-	public function getMiddle_name(){
+	public function getMiddleName(){
 		return $this->middle_name;
 	}
 
-	public function setMiddle_name($middle_name){
+	public function setMiddleName($middle_name){
 		$this->middle_name = $middle_name;
 	}
 
@@ -98,11 +98,11 @@ class OIDCUser
 		$this->nickname = $nickname;
 	}
 
-	public function getPreferred_username(){
+	public function getPreferredUsername(){
 		return $this->preferred_username;
 	}
 
-	public function setPreferred_username($preferred_username){
+	public function setPreferredUsername($preferred_username){
 		$this->preferred_username = $preferred_username;
 	}
 
@@ -138,11 +138,11 @@ class OIDCUser
 		$this->email = $email;
 	}
 
-	public function getEmail_verified(){
+	public function getEmailVerified(){
 		return $this->email_verified;
 	}
 
-	public function setEmail_verified($email_verified){
+	public function setEmailVerified($email_verified){
 		$this->email_verified = $email_verified;
 	}
 
@@ -178,19 +178,19 @@ class OIDCUser
 		$this->locale = $locale;
 	}
 
-	public function getPhone_number(){
+	public function getPhoneNumber(){
 		return $this->phone_number;
 	}
 
-	public function setPhone_number($phone_number){
+	public function setPhoneNumber($phone_number){
 		$this->phone_number = $phone_number;
 	}
 
-	public function getPhone_number_verified(){
+	public function getPhoneNumberVerified(){
 		return $this->phone_number_verified;
 	}
 
-	public function setPhone_number_verified($phone_number_verified){
+	public function setPhoneNumberVerified($phone_number_verified){
 		$this->phone_number_verified = $phone_number_verified;
 	}
 
@@ -202,11 +202,11 @@ class OIDCUser
 		$this->address = $address;
 	}
 
-	public function getUpdated_at(){
+	public function getUpdatedAt(){
 		return $this->updated_at;
 	}
 
-	public function setUpdated_at($updated_at){
+	public function setUpdatedAt($updated_at){
 		$this->updated_at = $updated_at;
 	}
 }

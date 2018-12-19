@@ -3,9 +3,9 @@
 namespace ojathelonius\oidc\auth\provider;
 
 use Jumbojett\OpenIDConnectClient;
-use Symfony\Component\Yaml\Yaml;
 use ojathelonius\oidc\model\OIDCUser;
 use ojathelonius\oidc\service\UserService;
+use Symfony\Component\Yaml\Yaml;
 
 if (!defined('IN_PHPBB')) {
     exit;
@@ -63,13 +63,22 @@ class auth_oidc extends \phpbb\auth\provider\base
 
         $oidc->setRedirectURL(generate_board_url() . '/');
         $oidc->authenticate();
-        
+
         /* Create OIDCUser */
         $oidcUser = new OIDCUser($oidc->requestUserInfo());
 
-        /* If user does not exist, and config disallow creating new users */
-        if (!UserService::userExists($oidcUser->getSub()) && !$this->config['createIfMissing']) {
-            /* TODO : handle exceptions */
+        /* If user does not already exist*/
+        if (!UserService::userExists($oidcUser->getPreferredUsername())) {
+
+            /* If configuration allows, create new user */
+            if ($this->config['createIfMissing']) {
+                UserService::createUser($oidcUser);
+            } else {
+                /* TODO : handle exceptions if user is missing and createIfMissing is false */
+            }
+
+        } else {
+            /* Register user */
         }
     }
 
