@@ -2,20 +2,35 @@
 
 namespace ojathelonius\oidc\service;
 
-/* This is required to use /includes functions from extensions */
-include $this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext;
-
 class UserService
 {
 
+    private $db;
+    private $config;
+    private $phpbb_root_path;
+    private $php_ext;
+
+    public function __construct($db, $config, $phpbb_root_path, $php_ext)
+    {
+        $this->db = $db;
+        $this->config = $config;
+        $this->phpbb_root_path = $phpbb_root_path;
+        $this->php_ext = $php_ext;
+
+        /* This is required to use /includes functions from extensions */
+        if (!function_exists('user_add')) {
+            include $this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext;
+        }
+    }
+
     /**
+     * Returns true if user exists in database, false otherwise
      * @param bool $sub
      * @return bool
      */
-    public static function userExists($sub)
+    public function userExists($sub)
     {
-
-        /* user_get_id_name requires passing parameters by value */
+        /* user_get_id_name requires passing parameters by value as it modifies the one or the other */
         $userArray = [];
         $subjectArray = [$sub];
 
@@ -26,41 +41,58 @@ class UserService
     }
 
     /**
+     * Create user
      * @param OIDCUser $oidcUser
      */
-    public static function createUser($oidcUser)
+    public function createUser($oidcUser)
     {
+        $userId = user_add($this->createDefaultUserRow($oidcUser));
 
-        /* TODO : customize default values or inherit from IdP */
-        $defaultGroupId = 1;
-        $defaultUserType = 1;
-
-        /* TODO : use subject instead of username as principal */
-        $userArray = [
-            "username" => $oidcUser->getPreferredUsername(),
-            "group_id" => $defaultGroupId,
-            "user_email" => $oidcUser->getEmail(),
-            "user_type" => $defaultUserType,
-        ];
-        return user_add($userArray);
+        return $this->getUserRow($oidcUser->getPreferredUsername());
     }
 
     /**
+     * Get user row based on subject
      * @param bool $sub
      * @return array
      */
-    public static function getUserRow($sub)
+    public function getUserRow($sub)
     {
-		global $db;
-		echo $sub;
-        $sql = 'SELECT user_id, username, user_password, user_passchg, user_email, user_type, user_login_attempts
+        $sql = 'SELECT *
             FROM ' . USERS_TABLE . "
-            WHERE username_clean = '" . $db->sql_escape($sub) . "'";
-        $result = $db->sql_query($sql);
-        $row = $db->sql_fetchrow($result);
-		$db->sql_freeresult($result);
-	
-		return $row;
+            WHERE username_clean = '" . $this->db->sql_escape($sub) . "'";
+        $result = $this->db->sql_query($sql);
+        $row = $this->db->sql_fetchrow($result);
+        $this->db->sql_freeresult($result);
+        return $row;
+    }
+
+    /**
+     * Create a default user row
+     * @param OIDCUser $oidcUser
+     */
+    public function createDefaultUserRow($oidcUser)
+    {
+        /* Retrieve default groupId */
+        $sql = 'SELECT group_id
+        FROM ' . GROUPS_TABLE . "
+        WHERE group_name = '" . $this->db->sql_escape('REGISTERED') . "'
+            AND group_type = " . GROUP_SPECIAL;
+        $result = $this->db->sql_query($sql);
+        $row = $this->db->sql_fetchrow($result);
+        $this->db->sql_freeresult($result);
+
+        if (!$row) {
+            trigger_error('NO_GROUP');
+        }
+
+        return array(
+            'username' => $oidcUser->getPreferredUsername(),
+            'user_email' => $oidcUser->getEmail(),
+            'group_id' => (int) $row['group_id'],
+            'user_type' => USER_NORMAL,
+            'user_new' => ($this->config['new_member_post_limit']) ? 1 : 0,
+        );
     }
 
 }

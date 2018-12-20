@@ -13,22 +13,25 @@ if (!defined('IN_PHPBB')) {
 
 class auth_oidc extends \phpbb\auth\provider\base
 {
-    /** @var \phpbb\db\driver\driver_interface $db */
-    protected $db;
-
     /* Configuration */
-    private $config;
+    private $pluginConfig;
+
+    private $userService;
 
     /**
-     * Database Authentication Constructor
-     *
-     * @param \phpbb\db\driver\driver_interface $db
-     */
-    public function __construct(\phpbb\db\driver\driver_interface $db)
+	 * OIDC Authentication Constructor
+	 *
+	 * @param	\phpbb\db\driver\driver_interface 	$db		Database object
+	 * @param	\phpbb\config\config 		$config		Config object
+	 * @param	string 				$phpbb_root_path		Relative path to phpBB root
+	 * @param	string 				$php_ext		PHP file extension
+	 */
+    public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, $phpbb_root_path, $php_ext)
     {
-        $this->db = $db;
+        /* Plugin configuration */
+        $this->pluginConfig = $this->getPluginConfig();
 
-        $this->config = $this->getOIDCConfig();
+        $this->userService = new UserService($db, $config, $phpbb_root_path, $php_ext);
     }
 
     /**
@@ -36,7 +39,11 @@ class auth_oidc extends \phpbb\auth\provider\base
      */
     public function login($username, $password)
     {
-        return $this->oidcLogin();
+        /**
+         * The login function is designed to receive username and passwords, thus is redundant with OpenID Connect login.
+         * It is possible to implement it, however it should return array messages instead of user rows, see phpbb\auth or
+         * phpbb\auth\provider\apache for an example
+         */
     }
 
     /**
@@ -54,12 +61,12 @@ class auth_oidc extends \phpbb\auth\provider\base
     {
 
         $oidc = new OpenIDConnectClient(
-            $this->config['url'],
-            $this->config['clientId'],
-            $this->config['secret']);
+            $this->pluginConfig['url'],
+            $this->pluginConfig['clientId'],
+            $this->pluginConfig['secret']);
 
-        $oidc->setVerifyPeer($this->config['ssl']);
-        $oidc->setVerifyHost($this->config['ssl']);
+        $oidc->setVerifyPeer($this->pluginConfig['ssl']);
+        $oidc->setVerifyHost($this->pluginConfig['ssl']);
 
         $oidc->setRedirectURL(generate_board_url() . '/');
         $oidc->authenticate();
@@ -68,36 +75,25 @@ class auth_oidc extends \phpbb\auth\provider\base
         $oidcUser = new OIDCUser($oidc->requestUserInfo());
 
         /* If user does not already exist */
-        if (!UserService::userExists($oidcUser->getPreferredUsername())) {
+        if (!$this->userService->userExists($oidcUser->getPreferredUsername())) {
 
             /* If configuration allows, create new user */
-            if ($this->config['createIfMissing']) {
-                UserService::createUser($oidcUser);
+            if ($this->pluginConfig['createIfMissing']) {
+                return $this->userService->createUser($oidcUser);
             } else {
-                /* TODO : handle exceptions if user is missing and createIfMissing is false */
+                /* TODO : handle error */
             }
 
         } else {
-            $userRow = UserService::getUserRow($oidcUser->getPreferredUsername());
-
-            return $this->buildReturn($userRow);
+            return $this->userService->getUserRow($oidcUser->getPreferredUsername());
         }
     }
 
     /**
-     * Retrieve OIDC config from yml config file
+     * Retrieve plugin configuration from yml config file
      */
-    public function getOIDCConfig()
+    public function getPluginConfig()
     {
         return Yaml::parse(file_get_contents(__DIR__ . '/../../config/oidc.yml'));
-    }
-
-    public function buildReturn($row)
-    {
-        return [
-            'status' => LOGIN_SUCCESS,
-            'error_msg' => false,
-            'user_row' => $row,
-        ];
     }
 }
