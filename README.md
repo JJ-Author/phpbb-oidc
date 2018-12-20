@@ -40,7 +40,7 @@ createIfMissing: true
 
 ## Caveats
 * This plugin currently uses autologin for authentication : users are redirected to the IdP as soon as they land on phpBB
-* OpenID-Connect-PHP does not implement Single Sign-Off yet
-* Configuration still needs to be done through oidc.yml rather than with the ACP
+* OpenID-Connect-PHP does not implement Single Sign-Off yet : users will not be logged out automatically from phpBB when logging out from another SP
+* Configuration still needs to be done through oidc.yml rather than through the ACP
 * Still working on finding a way to show user friendly errors in the autologin auth flow, since `trigger_error` and `Exception` are not caught, unlike with the login flow
 
