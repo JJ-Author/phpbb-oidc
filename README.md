@@ -22,6 +22,11 @@ ssl: false
 createIfMissing: true
 ```
 
+## Extend
+phpbb-oidc uses standard OpenID user attributes. There are several additional attributes that could be retrieved the same way, such as groups, roles, user info...
+
+In order to do this, the `OIDCUser` should be modified, and the field mapping must be done in both `createDefaultUserRow` and `updateUser`.
+
 ## Examples
 ### Example with Keycloak
 

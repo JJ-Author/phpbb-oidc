@@ -79,7 +79,7 @@ class auth_oidc extends \phpbb\auth\provider\base
      * OpenID Connect login
      */
     private function oidcLogin()
-    {
+    {   
         $this->oidc->authenticate();
 
         /* Create OIDCUser */
@@ -97,6 +97,7 @@ class auth_oidc extends \phpbb\auth\provider\base
             }
 
         } else {
+            $this->userService->updateUser($oidcUser);
             return $this->userService->getUserRow($oidcUser->getPreferredUsername());
         }
     }
