@@ -1,5 +1,5 @@
 # phpbb-oidc
-phpBB OpenID Connect plugin
+phpBB OpenID Connect plugin, based on [jumbojett/OpenID-Connect-PHP](https://github.com/jumbojett/OpenID-Connect-PHP).
 
 ## OpenID Connect
 Per the [OpenID Connect specifications](https://openid.net/specs/openid-connect-core-1_0.html), phpbb-oidc should use `sub` as the sole identifier for the Service Provider (see [#5.1](https://openid.net/specs/openid-connect-core-1_0.html#IDToken)). However because PHPBB uses usernames as user identifiers, this plugin currently uses the preferredUsername attribute to identify users.
@@ -33,9 +33,9 @@ ssl: false
 createIfMissing: true
 ```
 
-## TODO
-* Implement OpenID without autologin
-* Allow configuration directly into phpBB ACP
-* Implement log out feature
-* Implement Single-Sign-Off, once [OpenID-Connect-PHP](https://github.com/jumbojett/OpenID-Connect-PHP/issues/116) supports it
+## Caveats
+* This plugin currently uses autologin for authentication : users are redirected to the IdP as soon as they land on phpBB
+* OpenID-Connect-PHP does not implement Single Sign-Off yet
+* Configuration still needs to be done through oidc.yml rather than with the ACP
+* Still working on finding a way to show user friendly errors in the autologin auth flow, since `trigger_error` and `Exception` are not caught, unlike with the login flow
 

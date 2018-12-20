@@ -18,20 +18,33 @@ class auth_oidc extends \phpbb\auth\provider\base
 
     private $userService;
 
+    private $oidc;
+
     /**
-	 * OIDC Authentication Constructor
-	 *
-	 * @param	\phpbb\db\driver\driver_interface 	$db		Database object
-	 * @param	\phpbb\config\config 		$config		Config object
-	 * @param	string 				$phpbb_root_path		Relative path to phpBB root
-	 * @param	string 				$php_ext		PHP file extension
-	 */
+     * OIDC Authentication Constructor
+     *
+     * @param    \phpbb\db\driver\driver_interface     $db        Database object
+     * @param    \phpbb\config\config         $config        Config object
+     * @param    string                 $phpbb_root_path        Relative path to phpBB root
+     * @param    string                 $php_ext        PHP file extension
+     */
     public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, $phpbb_root_path, $php_ext)
     {
         /* Plugin configuration */
         $this->pluginConfig = $this->getPluginConfig();
 
         $this->userService = new UserService($db, $config, $phpbb_root_path, $php_ext);
+
+        $this->oidc = new OpenIDConnectClient(
+            $this->pluginConfig['url'],
+            $this->pluginConfig['clientId'],
+            $this->pluginConfig['secret']
+        );
+
+        $this->oidc->setVerifyPeer($this->pluginConfig['ssl']);
+        $this->oidc->setVerifyHost($this->pluginConfig['ssl']);
+
+        $this->oidc->setRedirectURL(generate_board_url() . '/');
     }
 
     /**
@@ -55,24 +68,22 @@ class auth_oidc extends \phpbb\auth\provider\base
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function logout($data, $new_session)
+    {   
+        $this->oidc->signOut($this->oidc->getAccessToken(), $this->oidc->getRedirectURL());
+    }
+
+    /**
      * OpenID Connect login
      */
-    public function oidcLogin()
+    private function oidcLogin()
     {
-
-        $oidc = new OpenIDConnectClient(
-            $this->pluginConfig['url'],
-            $this->pluginConfig['clientId'],
-            $this->pluginConfig['secret']);
-
-        $oidc->setVerifyPeer($this->pluginConfig['ssl']);
-        $oidc->setVerifyHost($this->pluginConfig['ssl']);
-
-        $oidc->setRedirectURL(generate_board_url() . '/');
-        $oidc->authenticate();
+        $this->oidc->authenticate();
 
         /* Create OIDCUser */
-        $oidcUser = new OIDCUser($oidc->requestUserInfo());
+        $oidcUser = new OIDCUser($this->oidc->requestUserInfo());
 
         /* If user does not already exist */
         if (!$this->userService->userExists($oidcUser->getPreferredUsername())) {
@@ -82,6 +93,7 @@ class auth_oidc extends \phpbb\auth\provider\base
                 return $this->userService->createUser($oidcUser);
             } else {
                 /* TODO : handle error */
+                /* The issue here is that we cannot call trigger_error() from autologin to display a proper error message */
             }
 
         } else {
@@ -92,7 +104,7 @@ class auth_oidc extends \phpbb\auth\provider\base
     /**
      * Retrieve plugin configuration from yml config file
      */
-    public function getPluginConfig()
+    private function getPluginConfig()
     {
         return Yaml::parse(file_get_contents(__DIR__ . '/../../config/oidc.yml'));
     }
