@@ -1,6 +1,11 @@
 url: 'http://idp/'
 clientId: 'clientId'
 secret: 'secret'
-ssl: false
+ssl: true
 createIfMissing: true
+redirect: 'https://databus.dbpedia.org/forum'
+stableRedirect: true
+LogoutAllOidcOnForumLogout: false
+debug: false
+
 
