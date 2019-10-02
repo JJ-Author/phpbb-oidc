@@ -45,17 +45,6 @@ phpbb-oidc uses standard OpenID user attributes. There are several additional at
 
 In order to do this, the `OIDCUser` should be modified, and the field mapping must be done in both `createDefaultUserRow` and `updateUser`.
 
-## Examples
-### Example with Keycloak
-
-```yaml
-url: 'https://keycloak/auth/realms/my-realm/'
-clientId: 'clientId'
-secret: 'secret'
-ssl: false
-createIfMissing: true
-```
-
 ## Caveats
 * This plugin currently uses autologin for authentication : users are redirected to the IdP as soon as the login button is clicked or the action requires the user to login. therefore the password reauthenticate prompt for ACP needs to be removed in the phpbb source code in order to use ACP.
 * OpenID-Connect-PHP does not implement Single Sign-Off yet : users will not be logged out automatically from phpBB when logging out from another SP
