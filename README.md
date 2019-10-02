@@ -1,10 +1,10 @@
+# phpBB auth plugin for OIDC (OpenID Connect) 
+fork of phpBB OpenID Connect plugin, based on [jumbojett/OpenID-Connect-PHP](https://github.com/jumbojett/OpenID-Connect-PHP).
+
 ## Features of the fork
 * users do not need to login anymore to view posts (oidc request is only requested on pages requiring credentials)
 * initial support for phpbb docker setup (phpbb running in docker and behind HTTP (reverse) proxy)
 * added some new config options (e.g. debug mode)
-
-# phpbb-oidc
-phpBB OpenID Connect plugin, based on [jumbojett/OpenID-Connect-PHP](https://github.com/jumbojett/OpenID-Connect-PHP).
 
 ## OpenID Connect
 Per the [OpenID Connect specifications](https://openid.net/specs/openid-connect-core-1_0.html), phpbb-oidc should use `sub` as the sole identifier for the Service Provider (see [#5.1](https://openid.net/specs/openid-connect-core-1_0.html#IDToken)). However because PHPBB uses usernames as user identifiers, this plugin currently uses the preferredUsername attribute to identify users.
