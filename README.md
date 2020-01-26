@@ -2,7 +2,7 @@
 fork of phpBB OpenID Connect plugin, based on [jumbojett/OpenID-Connect-PHP](https://github.com/jumbojett/OpenID-Connect-PHP).
 
 ## Features of the fork
-* users do not need to login anymore to view posts (oidc request is only requested on pages requiring credentials)
+* users do not need to login anymore to view posts (oidc request is only performed for pages/actions requiring credentials)
 * initial support for phpbb docker setup (phpbb running in docker and behind HTTP (reverse) proxy)
 * added some new config options (e.g. debug mode)
 
